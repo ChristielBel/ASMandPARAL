@@ -4,6 +4,7 @@ using namespace std;
 int main()
 {
     int x, m, k;
+    cout << "Number and Degree:" << endl;
     cin >> x >> m;
     __asm {
         mov eax, x
@@ -26,14 +27,10 @@ int main()
 
         loop_0:
         cmp eax, x
-        jg final_loop
+        jne final_loop
         mov eax, 1
         final_loop:
         mov k, eax
     }
-    cout << k;
+    cout << "Result:" << endl << k;
 }
-
-//бинарный алгоритм возвдеения большого числа в степень 
-//если 0 - текущий результат возводится в квадрат
-//если 1 - текущий резльтат возводится в квадрат и умножается на х
