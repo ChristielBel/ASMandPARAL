@@ -79,12 +79,12 @@ bool solveLinearSystem(vector <vector<double>>& A)
 #pragma omp for
             for (int i = k - 1; i > -1; i--)
             {
-                double temp = matrix[i][k];
+                double temp = A[i][k];
 
                 for (int j = 0; j < matrix_size; j++)
                 {
                     A[i][j] -= temp * A[k][j];
-                    T[i][j] -= temp *T[k][j];
+                    T[i][j] -= temp * T[k][j];
                 }
             }
         }
@@ -123,7 +123,7 @@ int main()
     if (!solveLinearSystem(A))
     {
         cout << "Error!\n";
-        exit(1);
+        return 1;
     }
 
     vector<double> X(n);
