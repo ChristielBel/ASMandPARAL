@@ -6,9 +6,11 @@
 #include <vector>
 using namespace std;
 
-bool calculate_inverse_matrix(vector <vector<double>>& matrix)
+const double EPS = 1e-8;
+
+bool solveLinearSystem(vector <vector<double>>& A)
 {
-    int matrix_size = matrix.size();
+    int matrix_size = A.size();
     vector <vector<double>> T(matrix_size, vector<double>(matrix_size));
 
     for (int i = 0; i < matrix_size; i++)
@@ -22,15 +24,15 @@ bool calculate_inverse_matrix(vector <vector<double>>& matrix)
 
     for (int k = 0; k < matrix_size; k++)
     {
-        if (abs(matrix[k][k]) < 1e-8)
+        if (abs(A[k][k]) < EPS)
         {
             bool flag = false;
 
             for (int i = k + 1; i < matrix_size; i++)
             {
-                if (abs(matrix[i][k]) > 1e-8)
+                if (abs(A[i][k]) > EPS)
                 {
-                    swap(matrix[k], matrix[i]);
+                    swap(A[k], A[i]);
                     swap(T[k], T[i]);
                     flag = true;
                     break;
@@ -41,14 +43,14 @@ bool calculate_inverse_matrix(vector <vector<double>>& matrix)
                 return false;
         }
 
-        double temp = matrix[k][k];
+        double temp = A[k][k];
 
 #pragma omp parallel
         {
 #pragma omp for
             for (int j = 0; j < matrix_size; j++)
             {
-                matrix[k][j] /= temp;
+                A[k][j] /= temp;
                 T[k][j] /= temp;
             }
         }
@@ -58,12 +60,12 @@ bool calculate_inverse_matrix(vector <vector<double>>& matrix)
 #pragma omp for
             for (int i = k + 1; i < matrix_size; i++)
             {
-                double temp = matrix[i][k];
+                double temp = A[i][k];
 
 
                 for (int j = 0; j < matrix_size; j++)
                 {
-                    matrix[i][j] -= temp * matrix[k][j];
+                    A[i][j] -= temp * A[k][j];
                     T[i][j] -= temp * T[k][j];
                 }
             }
@@ -81,13 +83,13 @@ bool calculate_inverse_matrix(vector <vector<double>>& matrix)
 
                 for (int j = 0; j < matrix_size; j++)
                 {
-                    matrix[i][j] -= temp * matrix[k][j];
+                    A[i][j] -= temp * A[k][j];
                     T[i][j] -= temp *T[k][j];
                 }
             }
         }
     }
-    matrix = T;
+    A = T;
     return true;
 }
 
@@ -102,24 +104,23 @@ double generate_random_number(const int min, const int max)
 int main()
 {
     srand(time(NULL));
-    setlocale(LC_ALL, "RUS");
     int n;
-    cout << "Введите количество уравнений: ";
+    cout << "Enter the number of equations and variables (n): ";
     cin >> n;
 
-    vector<vector<double>> matrix(n, vector<double>(n));
+    vector<vector<double>> A(n, vector<double>(n));
     vector<double> B(n);
 
     for (int i = 0; i < n; i++)
     {
         for (int j = 0; j < n; j++)
-            matrix[i][j] = generate_random_number(0, 100);
+            A[i][j] = generate_random_number(0, 100);
         B[i] = generate_random_number(0, 100);
     }
 
     auto start_time = chrono::high_resolution_clock::now();
 
-    if (!calculate_inverse_matrix(matrix))
+    if (!calculate_inverse_matrix(A))
     {
         cout << "Error!\n";
         exit(1);
@@ -133,13 +134,12 @@ int main()
         {
             X[i] = 0;
             for (int j = 0; j < n; j++)
-                X[i] += matrix[i][j] * B[j];
+                X[i] += A[i][j] * B[j];
         }
     }
 
     auto end_time = chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
-
     cout << "Time: " << duration.count() << " microseconds";
 
     return 0;
