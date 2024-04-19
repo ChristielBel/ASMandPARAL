@@ -120,7 +120,7 @@ int main()
 
     auto start_time = chrono::high_resolution_clock::now();
 
-    if (!calculate_inverse_matrix(A))
+    if (!solveLinearSystem(A))
     {
         cout << "Error!\n";
         exit(1);
