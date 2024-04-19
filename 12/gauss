@@ -1,0 +1,79 @@
+#include <iostream>
+#include <vector>
+#include <random>
+#include <time.h>
+#include <chrono>
+
+using namespace std;
+
+const double EPS = 1e-8;
+
+vector<double> solveLinearSystem(vector<vector<double>>& A, vector<double>& B) {
+	int matrix_size = A.size();
+	for (int i = 0; i < matrix_size; i++) {
+		int temp = i;
+		for (int j = i + 1; j < matrix_size; j++) {
+			if (abs(A[j][i]) > abs(A[temp][i])) {
+				temp = j;
+			}
+		}
+		swap(A[i], A[temp]);
+		swap(B[i], B[temp]);
+
+		if (abs(A[i][i]) < EPS) {
+			continue;
+		}
+
+		double diagonal_element = A[i][i];
+		for (int j = i; j < matrix_size; j++) {
+			A[i][j] /= diagonal_element;
+		}
+		B[i] /= diagonal_element;
+
+		for (int j = 0; j < matrix_size; j++) {
+			if (j != i) {
+				double factor = A[j][i];
+				for (int k = i; k < matrix_size; k++) {
+					A[j][k] -= factor * A[i][k];
+				}
+				B[j] -= factor * B[i];
+			}
+		}
+	}
+
+	return B;
+}
+
+double generate_random_number(const int min, const int max)
+{
+	random_device rd;
+	mt19937 gen(rd());
+	uniform_real_distribution<double> dis(min, max);
+	return dis(gen);
+}
+
+int main() {
+	srand(time(NULL));
+	int n;
+	cout << "Enter the number of equations and variables (n): ";
+	cin >> n;
+
+	vector<vector<double>> A(n, vector<double>(n));
+	vector<double> B(n);
+
+	for (int i = 0; i < n; i++)
+	{
+		for (int j = 0; j < n; j++)
+			A[i][j] = generate_random_number(0, 100);
+		B[i] = generate_random_number(0, 100);
+	}
+	auto start_time = chrono::high_resolution_clock::now();
+
+	vector<double> X = solveLinearSystem(A, B);
+
+	auto end_time = chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+	cout << "Time: " << duration.count() << " microseconds";
+
+	return 0;
+}
