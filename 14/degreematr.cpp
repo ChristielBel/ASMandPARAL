@@ -30,9 +30,9 @@ int main()
 	for (int i = 0; i < n * n; i++)
 		pa[i] = 1;
 	double * pc = new double[n * n];
+	double* pa1 = new double[n * n];
 	auto start = std::chrono::high_resolution_clock::now();
-	MatrixMulti(pc, pa, pa, M, N, K);
-	double* pa1 = pc;
+	MatrixMulti(pa1, pa, pa, M, N, K);
 	MatrixMulti(pc, pa, pa1, M, N, K);
 	auto end = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
